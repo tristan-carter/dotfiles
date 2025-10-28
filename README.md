@@ -1,6 +1,6 @@
 # Tristan Carter's macOS Development Setup
 
-Sets up my personal C++ dev enviroment with Neovim, tmux, Zsh, and Kitty on new mac devices.
+Sets up my configured C++ dev enviroment with Neovim, tmux, Zsh, and Kitty alongside my custom configs on new mac devices.
 
 ## Installation
 
