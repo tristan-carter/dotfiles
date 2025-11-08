@@ -2,6 +2,9 @@
 
 Sets up my configured C++ dev enviroment with Neovim, tmux, Zsh, and Kitty for quick setup on new macs.
 
+## Shortcuts list
+Ctrl+\ then Ctrl+n to go to normal nvim mode when in a nvim terminal
+
 ## Installation
 
 Clone the repository and run the setup command:
