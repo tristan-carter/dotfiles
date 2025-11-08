@@ -1,69 +1,46 @@
--- =========================
--- Lazy.nvim plugin manager
--- =========================
+-- ── Lazy.nvim plugin manager ────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
+    "git", "clone", "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable",
-    lazypath,
+    "--branch=stable", lazypath,
   })
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- ── Plugins ─────────────────────────────────────────
 require("lazy").setup({
-    -- Color scheme
-    { "morhetz/gruvbox" },           -- classic dark hacker vibe
-    { "catppuccin/nvim", name = "catppuccin" }, -- alternative soft theme
-
-    -- Syntax highlighting
-    { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" },
-
-    -- Status line
-    { "nvim-lualine/lualine.nvim" },
-
-    -- Autopairs
-    { "windwp/nvim-autopairs" },
-
-    -- File explorer (optional)
-    { "kyazdani42/nvim-tree.lua" },
-
-    -- Git integration
-    { "tpope/vim-fugitive" },
+  { "morhetz/gruvbox" },
+  { "catppuccin/nvim", name = "catppuccin" },
+  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+  { "nvim-lualine/lualine.nvim" },
+  { "windwp/nvim-autopairs" },
+  { "kyazdani42/nvim-tree.lua" },
+  { "tpope/vim-fugitive" },
+  { "christoomey/vim-tmux-navigator" },
 })
 
--- =========================
--- General settings
--- =========================
-vim.opt.number = true         -- show line numbers
+-- ── General settings ────────────────────────────────
+vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.clipboard = "unnamedplus"  -- system clipboard
-vim.cmd[[colorscheme gruvbox]]      -- pick your theme
+vim.opt.clipboard = "unnamedplus"
+vim.cmd[[colorscheme gruvbox]]
 
--- =========================
--- Treesitter setup
--- =========================
+-- ── Treesitter ──────────────────────────────────────
 require'nvim-treesitter.configs'.setup {
   ensure_installed = { "c", "cpp", "lua" },
   highlight = { enable = true },
 }
 
--- =========================
--- Lualine setup
--- =========================
+-- ── Lualine ─────────────────────────────────────────
 require('lualine').setup {
-    options = {
-        theme = 'gruvbox',
-        section_separators = '',
-        component_separators = ''
-    }
+  options = {
+    theme = 'gruvbox',
+    section_separators = '',
+    component_separators = ''
+  }
 }
 
--- =========================
--- Autopairs
--- =========================
+-- ── Autopairs ───────────────────────────────────────
 require('nvim-autopairs').setup{}
-
