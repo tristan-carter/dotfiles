@@ -1,12 +1,9 @@
 
-# ⌨️ Keybindings & Shortcuts Reference
-
-Quick reference for all common keybinds across **Kitty**, **tmux**, and **Neovim** in this setup.  
-Designed for macOS + Windows keyboard using Kitty + tmux + Zsh + Neovim.
+# Keybindings & Shortcuts Reference
 
 ---
 
-## 🐱 Kitty
+## Kitty
 
 | Shortcut | Action |
 |-----------|--------|
@@ -22,7 +19,7 @@ Designed for macOS + Windows keyboard using Kitty + tmux + Zsh + Neovim.
 
 ---
 
-## 🧱 tmux
+## tmux
 
 > Prefix = `Ctrl+A`
 
@@ -45,9 +42,9 @@ Designed for macOS + Windows keyboard using Kitty + tmux + Zsh + Neovim.
 
 ---
 
-## 🌀 Neovim
+## Neovim
 
-### 🔁 Navigation
+### Navigation
 
 | Shortcut | Action |
 |-----------|--------|
@@ -58,7 +55,7 @@ Designed for macOS + Windows keyboard using Kitty + tmux + Zsh + Neovim.
 | **:NvimTreeToggle** | Toggle file explorer |
 | **:Git** | Open fugitive Git interface |
 
-### 🌈 Visual & Utility
+### Visual & Utility
 
 | Shortcut | Action |
 |-----------|--------|
@@ -69,7 +66,7 @@ Designed for macOS + Windows keyboard using Kitty + tmux + Zsh + Neovim.
 
 ---
 
-## 🧩 Shell / Zsh
+## Shell / Zsh
 
 | Command / Shortcut | Action |
 |---------------------|--------|
@@ -81,7 +78,7 @@ Designed for macOS + Windows keyboard using Kitty + tmux + Zsh + Neovim.
 
 ---
 
-## 🧰 Tips
+## Extras
 
 - Close Kitty anytime — tmux + Neovim stay alive in the background.  
   Reattach later with:
