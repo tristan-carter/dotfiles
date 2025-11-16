@@ -11,7 +11,3 @@ alias gc='git commit'
 
 # ── Default editor ──────────────────────────────────
 export EDITOR="nvim"
-
-# ── Kitty helper alias ──────────────────────────────
-# Opens new Kitty window attached to same tmux session
-alias ktmux='kitty @ launch --type=window tmux attach -t main'
