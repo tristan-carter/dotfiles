@@ -11,3 +11,6 @@ alias gc='git commit'
 
 # ── Default editor ──────────────────────────────────
 export EDITOR="nvim"
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+export LDFLAGS="-L/usr/local/opt/openssl/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl/include"
