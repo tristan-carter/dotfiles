@@ -15,12 +15,15 @@ if [[ "$OS" == "Darwin" ]]; then
 
     # Note: homebrew/cask-fonts is deprecated; fonts are now in the default tap
     brew install neovim tmux git zsh reattach-to-user-namespace
-    brew install --cask kitty font-fira-code
+    # UPDATED: Installing Nerd Font version for Powerlevel10k icons
+    brew install --cask kitty font-fira-code-nerd-font
 
 elif [[ "$OS" == "Linux" ]]; then
     # Linux Setup
     sudo apt update
-    sudo apt install -y neovim tmux git zsh curl wget xclip fonts-firacode
+    sudo apt install -y neovim tmux git zsh curl wget xclip
+
+    # Note: On Linux, you may need to install Nerd Fonts manually or let p10k handle it.
 
     # Install Kitty (Official Binary)
     if ! command -v kitty &>/dev/null; then
@@ -31,11 +34,10 @@ elif [[ "$OS" == "Linux" ]]; then
         mkdir -p ~/.local/bin
         ln -sf ~/.local/kitty.app/bin/kitty ~/.local/bin/kitty
 
-        # Create Desktop Launcher (for Pop!_OS Apps Menu)
+        # Create Desktop Launcher
         mkdir -p ~/.local/share/applications
         cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
         
-        # Update paths in the desktop file to point to the local installation
         sed -i "s|Icon=kitty|Icon=$HOME/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty.desktop
         sed -i "s|Exec=kitty|Exec=$HOME/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty.desktop
         
@@ -58,7 +60,6 @@ create_symlink() {
     local src=$1
     local dest=$2
     if [ -e "$dest" ]; then
-        # Only backup if it's not already a symlink to the correct location
         if [ "$(readlink "$dest")" != "$src" ]; then
             mv "$dest" "${dest}.backup"
             echo "Backed up existing $dest to ${dest}.backup"
@@ -69,6 +70,8 @@ create_symlink() {
 
 create_symlink "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
 create_symlink "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
+# UPDATED: Added p10k config symlink
+create_symlink "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 
 mkdir -p "$HOME/.config/nvim"
 create_symlink "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
