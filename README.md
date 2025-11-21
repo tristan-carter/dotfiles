@@ -1,14 +1,29 @@
-# Tristan Carter's macOS Development Setup
+# Tristan Carter's macOS/Linux Development Setup
+Sets up my configured development environment with Neovim, tmux, Zsh, and Kitty. Designed for macOS and Linux.
 
-Sets up my configured C++ dev enviroment with Neovim, tmux, Zsh, and Kitty for quick setup on new macs.
+## Prerequisites
+Ensure git is installed before running the setup.
 
-## Shortcuts list
-Ctrl+\ then Ctrl+n to go to normal nvim mode when in a nvim terminal
+### macOS:
+git is usually available or will prompt to install the Command Line Tools automatically.
 
+### Linux:
+```bash
+sudo apt update && sudo apt install git -y
+```
 ## Installation
-
-Clone the repository and run the setup command:
+Clone the repository and run the installation script:
 
 ```bash
-git clone git@github.com:tristan-carter/dotfiles.git ~/dotfiles
-bash ~/dotfiles/install.sh
+git clone https://github.com/tristan-carter/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+chmod +x install.sh
+./install.sh
+```
+
+## Post-Installation
+Restart your terminal or run
+```bash
+source ~/.zshrc
+```
+to apply the changes.
