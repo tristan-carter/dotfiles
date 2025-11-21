@@ -1,58 +1,85 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 echo "==== Starting dotfiles installation ===="
 
-# ---------------------------
-# Homebrew installation
-#!/bin/bash
-set -euo pipefail
+# -----------------------------------------------------
+# Detect OS
+# -----------------------------------------------------
+OS="$(uname -s)"
 
-echo "==== Starting dotfiles installation ===="
-
-# Homebrew
-echo "[INFO] Checking Homebrew installation..."
-if ! command -v brew &>/dev/null; then
-    echo "[INFO] Homebrew not found. Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if [[ "$OS" == "Darwin" ]]; then
+    PLATFORM="mac"
+elif [[ "$OS" == "Linux" ]]; then
+    PLATFORM="linux"
 else
-    echo "[INFO] Homebrew is already installed."
+    echo "[ERROR] Unsupported OS: $OS"
+    exit 1
 fi
 
-# Packages
-echo "[INFO] Installing essential packages..."
-brew install neovim tmux git zsh reattach-to-user-namespace
-brew install --cask kitty
+echo "[INFO] Detected platform: $PLATFORM"
 
-# Symlinks
-echo "[INFO] Creating symlinks for dotfiles..."
-ln -sf ~/dotfiles/zsh/.zshrc ~/.zshrc
-ln -sf ~/dotfiles/tmux/.tmux.conf ~/.tmux.conf
-mkdir -p ~/.config/nvim
-ln -sf ~/dotfiles/nvim/init.lua ~/.config/nvim/init.lua
-mkdir -p ~/.config/kitty
-ln -sf ~/dotfiles/kitty/kitty.conf ~/.config/kitty/kitty.conf
+# -----------------------------------------------------
+# Install packages (macOS vs Linux)
+# -----------------------------------------------------
+if [[ "$PLATFORM" == "mac" ]]; then
+    echo "[INFO] Checking Homebrew installation..."
+    if ! command -v brew &>/dev/null; then
+        echo "[INFO] Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+        echo "[INFO] Homebrew already installed."
+    fi
 
-# Editor
-echo "[INFO] Setting Neovim as default editor..."
-export EDITOR="nvim"
+    echo "[INFO] Installing macOS packages..."
+    brew install neovim tmux git zsh reattach-to-user-namespace
+    brew install --cask kitty
 
-# Neovim plugins
-echo "[INFO] Installing Neovim plugin manager (lazy.nvim) if missing..."
+elif [[ "$PLATFORM" == "linux" ]]; then
+    echo "[INFO] Updating package lists..."
+    sudo apt update
+
+    echo "[INFO] Installing Linux packages..."
+    sudo apt install -y neovim tmux git zsh curl wget kitty
+
+    echo "[INFO] Installing Nerd Fonts..."
+    sudo apt install -y fonts-jetbrains-mono
+fi
+
+# -----------------------------------------------------
+# Symlinks (shared)
+# -----------------------------------------------------
+echo "[INFO] Creating symlinks..."
+
+ln -sf "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"
+ln -sf "$HOME/dotfiles/tmux/.tmux.conf" "$HOME/.tmux.conf"
+
+mkdir -p "$HOME/.config/nvim"
+ln -sf "$HOME/dotfiles/nvim/init.lua" "$HOME/.config/nvim/init.lua"
+
+mkdir -p "$HOME/.config/kitty"
+ln -sf "$HOME/dotfiles/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
+
+# -----------------------------------------------------
+# Neovim setup
+# -----------------------------------------------------
+echo "[INFO] Installing lazy.nvim plugin manager..."
+
 LAZY_PATH="$HOME/.config/nvim/lazy/lazy.nvim"
-if [ ! -d "$LAZY_PATH" ]; then
+if [[ ! -d "$LAZY_PATH" ]]; then
     git clone --filter=blob:none https://github.com/folke/lazy.nvim.git --branch=stable "$LAZY_PATH"
 fi
 
 echo "[INFO] Installing Neovim plugins..."
-nvim --headless +Lazy! sync +qa
+nvim --headless +Lazy! sync +qa || true
 
-# Tmux
-echo "[INFO] Setting up tmux session..."
-if command -v tmux &> /dev/null && [ -z "${TMUX:-}" ]; then
+# -----------------------------------------------------
+# Tmux session
+# -----------------------------------------------------
+if command -v tmux &>/dev/null && [[ -z "${TMUX:-}" ]]; then
+    echo "[INFO] Creating/attaching tmux session..."
     tmux attach -t main || tmux new -s main
 fi
 
 echo "==== Dotfiles installation complete ===="
 echo "[INFO] Restart your terminal or run: source ~/.zshrc"
-echo "[INFO] Neovim is now C++ ready with Treesitter and a professional Lualine status line."
