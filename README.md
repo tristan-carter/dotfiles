@@ -22,8 +22,11 @@ chmod +x install.sh
 ```
 
 ## Post-Installation
-Restart your terminal or run
+### All Users:
+Restart your terminal to switch to Zsh and apply changes.
+
+### Linux Users:
+If the Kitty icon does not appear in your launcher immediately, run:
 ```bash
-source ~/.zshrc
+update-desktop-database ~/.local/share/applications
 ```
-to apply the changes.
