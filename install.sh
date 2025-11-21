@@ -80,4 +80,3 @@ if [[ ! -d "$LAZY_PATH" ]]; then
 fi
 
 echo "==== Setup Complete ===="
-echo "Restart your terminal. On Linux, you may need to log out and back in for the Kitty icon to appear."
