@@ -13,7 +13,7 @@ if [[ "$OS" == "Darwin" ]]; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    brew tap homebrew/cask-fonts
+    # Note: homebrew/cask-fonts is deprecated; fonts are now in the default tap
     brew install neovim tmux git zsh reattach-to-user-namespace
     brew install --cask kitty font-fira-code
 
@@ -58,7 +58,11 @@ create_symlink() {
     local src=$1
     local dest=$2
     if [ -e "$dest" ]; then
-        mv "$dest" "${dest}.backup"
+        # Only backup if it's not already a symlink to the correct location
+        if [ "$(readlink "$dest")" != "$src" ]; then
+            mv "$dest" "${dest}.backup"
+            echo "Backed up existing $dest to ${dest}.backup"
+        fi
     fi
     ln -sf "$src" "$dest"
 }
