@@ -14,60 +14,52 @@ if [[ "$OS" == "Darwin" ]]; then
     fi
 
     echo "Installing Core Tools & Dependencies..."
-    # 'node' is required for Pyright; 'wget' is useful for lazy.nvim
     brew install git zsh reattach-to-user-namespace wget node
 
-    echo "Installing Neovim (Stable)..."
-    # If neovim is already installed, unlink it to ensure we don't stick with a 'HEAD' or 'Nightly' version
+    echo "Fixing Neovim Version..."
+    # AGGRESSIVE FIX: Uninstall existing Neovim to purge "Nightly/HEAD" versions
     if brew list neovim &>/dev/null; then
-        brew unlink neovim || true
+        echo "Uninstalling current Neovim to ensure clean state..."
+        brew uninstall neovim --ignore-dependencies || true
     fi
+    
+    echo "Installing Neovim (Stable)..."
     brew install neovim
 
     echo "Installing Fonts & Terminal..."
     brew install --cask kitty font-fira-code-nerd-font
 
     echo "Installing Language Servers..."
-    # 1. Python (Pyright) - Requires Node.js
+    # 1. Python (Pyright)
     if ! command -v pyright &>/dev/null; then
-        echo "Installing Pyright..."
         npm install -g pyright
     fi
 
-    # 2. Lua (Lua Language Server) - Crucial for editing Neovim config
+    # 2. Lua
     brew install lua-language-server
 
-    # 3. Rust - Handled by Rustup
+    # 3. Rust (Rustup)
     if ! command -v rustup &>/dev/null; then
-        echo "Installing Rustup..."
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
     fi
 
 elif [[ "$OS" == "Linux" ]]; then
-    # Linux Setup (Assumes Debian/Ubuntu based)
+    # Linux Setup
     sudo apt update
     sudo apt install -y neovim tmux git zsh curl wget xclip nodejs npm
 
     # Install Pyright
     sudo npm install -g pyright
 
-    # Install Kitty (Official Binary)
+    # Install Kitty
     if ! command -v kitty &>/dev/null; then
-        echo "Installing Kitty..."
         curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
-        
-        # Link binary to path
         mkdir -p ~/.local/bin
         ln -sf ~/.local/kitty.app/bin/kitty ~/.local/bin/kitty
-
-        # Create Desktop Launcher
         mkdir -p ~/.local/share/applications
         cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
-        
         sed -i "s|Icon=kitty|Icon=$HOME/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty.desktop
         sed -i "s|Exec=kitty|Exec=$HOME/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty.desktop
-        
-        echo "Kitty added to applications menu."
     fi
 fi
 
@@ -85,10 +77,7 @@ fi
 create_symlink() {
     local src=$1
     local dest=$2
-    
-    # Ensure parent directory exists
     mkdir -p "$(dirname "$dest")"
-
     if [ -e "$dest" ]; then
         if [ "$(readlink "$dest")" != "$src" ]; then
             mv "$dest" "${dest}.backup"
@@ -113,4 +102,4 @@ if [[ ! -d "$LAZY_PATH" ]]; then
 fi
 
 echo "==== Setup Complete ===="
-echo "Please restart your terminal for changes to take effect."
+echo "Please restart your terminal."
