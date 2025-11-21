@@ -1,85 +1,68 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "==== Starting dotfiles installation ===="
-
-# -----------------------------------------------------
-# Detect OS
-# -----------------------------------------------------
+DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 OS="$(uname -s)"
 
+echo "==== Starting Setup ===="
+
+# ── 1. Package Installation ──────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
-    PLATFORM="mac"
-elif [[ "$OS" == "Linux" ]]; then
-    PLATFORM="linux"
-else
-    echo "[ERROR] Unsupported OS: $OS"
-    exit 1
-fi
-
-echo "[INFO] Detected platform: $PLATFORM"
-
-# -----------------------------------------------------
-# Install packages (macOS vs Linux)
-# -----------------------------------------------------
-if [[ "$PLATFORM" == "mac" ]]; then
-    echo "[INFO] Checking Homebrew installation..."
     if ! command -v brew &>/dev/null; then
-        echo "[INFO] Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    else
-        echo "[INFO] Homebrew already installed."
     fi
 
-    echo "[INFO] Installing macOS packages..."
+    brew tap homebrew/cask-fonts
     brew install neovim tmux git zsh reattach-to-user-namespace
-    brew install --cask kitty
+    brew install --cask kitty font-fira-code
 
-elif [[ "$PLATFORM" == "linux" ]]; then
-    echo "[INFO] Updating package lists..."
+elif [[ "$OS" == "Linux" ]]; then
     sudo apt update
+    sudo apt install -y neovim tmux git zsh curl wget xclip fonts-firacode
 
-    echo "[INFO] Installing Linux packages..."
-    sudo apt install -y neovim tmux git zsh curl wget kitty
-
-    echo "[INFO] Installing Nerd Fonts..."
-    sudo apt install -y fonts-jetbrains-mono
+    # Install Kitty (Official Binary)
+    if ! command -v kitty &>/dev/null; then
+        curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+        mkdir -p ~/.local/bin
+        ln -sf ~/.local/kitty.app/bin/kitty ~/.local/bin/kitty
+    fi
 fi
 
-# -----------------------------------------------------
-# Symlinks (shared)
-# -----------------------------------------------------
-echo "[INFO] Creating symlinks..."
+# ── 2. Oh My Zsh & Powerlevel10k ─────────────────────
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
-ln -sf "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"
-ln -sf "$HOME/dotfiles/tmux/.tmux.conf" "$HOME/.tmux.conf"
+P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+if [ ! -d "$P10K_DIR" ]; then
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+fi
+
+# ── 3. Symlinks ──────────────────────────────────────
+create_symlink() {
+    local src=$1
+    local dest=$2
+    if [ -e "$dest" ]; then
+        mv "$dest" "${dest}.backup"
+    fi
+    ln -sf "$src" "$dest"
+}
+
+create_symlink "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+create_symlink "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 
 mkdir -p "$HOME/.config/nvim"
-ln -sf "$HOME/dotfiles/nvim/init.lua" "$HOME/.config/nvim/init.lua"
+create_symlink "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
 
 mkdir -p "$HOME/.config/kitty"
-ln -sf "$HOME/dotfiles/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
+create_symlink "$DOTFILES_DIR/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 
-# -----------------------------------------------------
-# Neovim setup
-# -----------------------------------------------------
-echo "[INFO] Installing lazy.nvim plugin manager..."
-
-LAZY_PATH="$HOME/.config/nvim/lazy/lazy.nvim"
+# ── 4. Neovim Bootstrap ──────────────────────────────
+LAZY_PATH="$HOME/.local/share/nvim/lazy/lazy.nvim"
 if [[ ! -d "$LAZY_PATH" ]]; then
+    mkdir -p "$(dirname "$LAZY_PATH")"
     git clone --filter=blob:none https://github.com/folke/lazy.nvim.git --branch=stable "$LAZY_PATH"
 fi
 
-echo "[INFO] Installing Neovim plugins..."
-nvim --headless +Lazy! sync +qa || true
-
-# -----------------------------------------------------
-# Tmux session
-# -----------------------------------------------------
-if command -v tmux &>/dev/null && [[ -z "${TMUX:-}" ]]; then
-    echo "[INFO] Creating/attaching tmux session..."
-    tmux attach -t main || tmux new -s main
-fi
-
-echo "==== Dotfiles installation complete ===="
-echo "[INFO] Restart your terminal or run: source ~/.zshrc"
+echo "==== Setup Complete ===="
+echo "Restart your terminal to see changes."
