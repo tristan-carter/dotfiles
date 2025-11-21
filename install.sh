@@ -8,6 +8,7 @@ echo "==== Starting Setup ===="
 
 # ── 1. Package Installation ──────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
+    # macOS Setup
     if ! command -v brew &>/dev/null; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
@@ -17,14 +18,28 @@ if [[ "$OS" == "Darwin" ]]; then
     brew install --cask kitty font-fira-code
 
 elif [[ "$OS" == "Linux" ]]; then
+    # Linux Setup
     sudo apt update
     sudo apt install -y neovim tmux git zsh curl wget xclip fonts-firacode
 
     # Install Kitty (Official Binary)
     if ! command -v kitty &>/dev/null; then
+        echo "Installing Kitty..."
         curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+        
+        # Link binary to path
         mkdir -p ~/.local/bin
         ln -sf ~/.local/kitty.app/bin/kitty ~/.local/bin/kitty
+
+        # Create Desktop Launcher (for Pop!_OS Apps Menu)
+        mkdir -p ~/.local/share/applications
+        cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
+        
+        # Update paths in the desktop file to point to the local installation
+        sed -i "s|Icon=kitty|Icon=$HOME/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty.desktop
+        sed -i "s|Exec=kitty|Exec=$HOME/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty.desktop
+        
+        echo "Kitty added to applications menu."
     fi
 fi
 
@@ -65,4 +80,4 @@ if [[ ! -d "$LAZY_PATH" ]]; then
 fi
 
 echo "==== Setup Complete ===="
-echo "Restart your terminal to see changes."
+echo "Restart your terminal. On Linux, you may need to log out and back in for the Kitty icon to appear."
