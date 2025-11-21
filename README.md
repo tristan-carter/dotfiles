@@ -12,21 +12,28 @@ git is usually available or will prompt to install the Command Line Tools automa
 sudo apt update && sudo apt install git -y
 ```
 ## Installation
-Clone the repository and run the installation script:
+Clone the repository and run the installation/update script:
 
 ```bash
-git clone https://github.com/tristan-carter/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-chmod +x install.sh
-./install.sh
+(
+  if [ -d ~/dotfiles ]; then
+    cd ~/dotfiles && git pull
+  else
+    git clone https://github.com/tristan-carter/dotfiles.git ~/dotfiles
+    cd ~/dotfiles
+  fi
+  chmod +x install.sh
+  ./install.sh
+)
 ```
 
 ## Post-Installation
 ### All Users:
-Restart your terminal to switch to Zsh and apply changes.
+Restart your terminal.
 
 ### Linux Users:
-If the Kitty icon does not appear in your launcher immediately, run:
+Run:
 ```bash
+chsh -s $(which zsh)
 update-desktop-database ~/.local/share/applications
 ```
