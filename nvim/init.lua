@@ -44,18 +44,27 @@ require("lazy").setup({
     version = "^4",
     ft = { "rust" },
   },
+  { "mfussenegger/nvim-dap" },
+  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap" } },
+  { "jose-elias-alvarez/null-ls.nvim" },
 })
 
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.clipboard = "unnamedplus"
 vim.opt.termguicolors = true
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.smartindent = true
+
 vim.cmd[[colorscheme gruvbox]]
 
 require("nvim-treesitter.configs").setup {
   ensure_installed = {
     "c", "cpp", "lua", "rust", "toml", "python", "bash"
   },
+  auto_install = true,
   highlight = { enable = true },
 }
 
@@ -70,6 +79,10 @@ require("lualine").setup {
 require("nvim-autopairs").setup {}
 
 require("nvim-tree").setup {}
+
+require("telescope").setup {}
+
+require("gitsigns").setup()
 
 local cmp = require("cmp")
 cmp.setup({
@@ -90,7 +103,7 @@ cmp.setup({
 })
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
+local lspconfig = require('lspconfig')
 local servers = { 'pyright', 'clangd', 'lua_ls' }
 for _, lsp in ipairs(servers) do
   local opts = {
@@ -100,21 +113,56 @@ for _, lsp in ipairs(servers) do
     opts.settings = {
       Lua = {
         diagnostics = { globals = { "vim" } },
-        workspace = {
-             library = vim.api.nvim_get_runtime_file("", true),
-        },
+        workspace = { library = vim.api.nvim_get_runtime_file("", true) },
       }
     }
   end
-  vim.lsp.config(lsp, opts)
-  vim.lsp.enable(lsp)
+  lspconfig[lsp].setup(opts)
 end
 
-require("telescope").setup {}
+local dap = require("dap")
+local dapui = require("dapui")
+dapui.setup()
 
-require("gitsigns").setup()
+dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
+dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
+dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
 
+dap.adapters.gdb = {
+  type = 'executable',
+  command = 'gdb',
+  args = { '-i', 'dap' }
+}
+
+dap.configurations.c = {
+  {
+    name = "Launch",
+    type = "gdb",
+    request = "launch",
+    program = "${workspaceFolder}/data_structures",
+    cwd = "${workspaceFolder}",
+  }
+}
+
+local null_ls = require("null-ls")
+null_ls.setup({
+  sources = {
+    null_ls.builtins.formatting.clang_format,
+    null_ls.builtins.diagnostics.cppcheck,
+  },
+})
+
+-- Keymaps
 vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]])
 vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]])
 vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]])
 vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]])
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostics' })
+vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
+vim.keymap.set('n', '<leader>m', ':make<CR>', { desc = 'Run Make' })
+vim.keymap.set('n', '<leader>mc', ':make clean<CR>', { desc = 'Make Clean' })
+vim.keymap.set('n', '<leader>mr', ':make run<CR>', { desc = 'Make Run' })
+vim.keymap.set('n', '<leader>d', require'dap'.continue, { desc = 'Debug Continue' })
+vim.keymap.set('n', '<leader>du', require'dapui'.toggle, { desc = 'Toggle DAP UI' })
+vim.keymap.set('n', '<leader>mv', ':!valgrind --leak-check=full ./data_structures<CR>', { desc = 'Valgrind Leak Check' })
+vim.keymap.set('n', '<leader>ff', require'telescope.builtin'.find_files, { desc = 'Find Files' })
