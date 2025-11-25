@@ -46,7 +46,7 @@ require("lazy").setup({
   },
   { "mfussenegger/nvim-dap" },
   { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
-  { "jose-elias-alvarez/null-ls.nvim" },
+  { "nvimtools/none-ls.nvim" },
 })
 
 vim.opt.number = true
@@ -145,7 +145,7 @@ dap.configurations.c = {
   }
 }
 
-local null_ls = require("null-ls")
+local null_ls = require("none-ls")
 null_ls.setup({
   sources = {
     null_ls.builtins.formatting.clang_format,
