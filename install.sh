@@ -1,4 +1,3 @@
-```lua
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
@@ -168,4 +167,3 @@ vim.keymap.set('n', '<leader>d', require'dap'.continue, { desc = 'Debug Continue
 vim.keymap.set('n', '<leader>du', require'dapui'.toggle, { desc = 'Toggle DAP UI' })
 vim.keymap.set('n', '<leader>mv', ':!valgrind --leak-check=full ./data_structures<CR>', { desc = 'Valgrind Leak Check' })
 vim.keymap.set('n', '<leader>ff', require'telescope.builtin'.find_files, { desc = 'Find Files' })
-```
