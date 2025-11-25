@@ -45,7 +45,7 @@ require("lazy").setup({
     ft = { "rust" },
   },
   { "mfussenegger/nvim-dap" },
-  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap" } },
+  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
   { "jose-elias-alvarez/null-ls.nvim" },
 })
 
@@ -103,7 +103,7 @@ cmp.setup({
 })
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local lspconfig = require('lspconfig')
+
 local servers = { 'pyright', 'clangd', 'lua_ls' }
 for _, lsp in ipairs(servers) do
   local opts = {
@@ -117,7 +117,8 @@ for _, lsp in ipairs(servers) do
       }
     }
   end
-  lspconfig[lsp].setup(opts)
+  vim.lsp.config(lsp, opts)
+  vim.lsp.enable(lsp)
 end
 
 local dap = require("dap")
