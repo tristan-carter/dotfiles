@@ -77,11 +77,8 @@ require("lualine").setup {
 }
 
 require("nvim-autopairs").setup {}
-
 require("nvim-tree").setup {}
-
 require("telescope").setup {}
-
 require("gitsigns").setup()
 
 local cmp = require("cmp")
@@ -103,8 +100,10 @@ cmp.setup({
 })
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
+-- Fix: Define lspconfig here
+local lspconfig = require('lspconfig')
 local servers = { 'pyright', 'clangd', 'lua_ls' }
+
 for _, lsp in ipairs(servers) do
   local opts = {
     capabilities = capabilities,
@@ -117,8 +116,7 @@ for _, lsp in ipairs(servers) do
       }
     }
   end
-  vim.lsp.config(lsp, opts)
-  vim.lsp.enable(lsp)
+  lspconfig[lsp].setup(opts)
 end
 
 local dap = require("dap")
@@ -140,12 +138,13 @@ dap.configurations.c = {
     name = "Launch",
     type = "gdb",
     request = "launch",
-    program = "${workspaceFolder}/data_structures",
+    program = "${workspaceFolder}/data_structures", 
     cwd = "${workspaceFolder}",
   }
 }
 
-local null_ls = require("none-ls")
+local null_ls = require("null-ls")
+
 null_ls.setup({
   sources = {
     null_ls.builtins.formatting.clang_format,
