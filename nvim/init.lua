@@ -1,6 +1,4 @@
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-
+-- ── Bootstrap Lazy.nvim ──────────────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -11,81 +9,111 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({
-  { "morhetz/gruvbox" },
-  { "catppuccin/nvim", name = "catppuccin" },
-  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-  { "nvim-lualine/lualine.nvim" },
-  { "windwp/nvim-autopairs" },
-  {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-    },
-  },
-  { "tpope/vim-fugitive" },
-  { "lewis6991/gitsigns.nvim" },
-  { "christoomey/vim-tmux-navigator" },
-  { "nvim-lua/plenary.nvim" },
-  { "nvim-telescope/telescope.nvim" },
-  { "neovim/nvim-lspconfig" },
-  {
-    "hrsh7th/nvim-cmp",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-    },
-  },
-  {
-    "mrcjkb/rustaceanvim",
-    version = "^4",
-    ft = { "rust" },
-  },
-  { "mfussenegger/nvim-dap" },
-  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
-  { "nvimtools/none-ls.nvim" },
-})
+-- ── General Configuration ────────────────────────────────
+vim.g.mapleader = " "
 
+-- UI & Layout
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.clipboard = "unnamedplus"
 vim.opt.termguicolors = true
+vim.opt.scrolloff = 8
+vim.opt.signcolumn = "yes"
+
+-- Indentation
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.smartindent = true
 
+-- ── Remote Clipboard (OSC 52) ────────────────────────────
+-- Configures Neovim to use ANSI escape codes for clipboard.
+-- Essential for copying from remote Linux to local Mac.
+vim.g.clipboard = {
+  name = 'OSC 52',
+  copy = {
+    ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+    ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+  },
+  paste = {
+    ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+    ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+  },
+}
+vim.opt.clipboard = "unnamedplus"
+
+-- ── Plugin Specification ─────────────────────────────────
+require("lazy").setup({
+  -- UI & Theme
+  { "morhetz/gruvbox" },
+  { "nvim-lualine/lualine.nvim" },
+  { "lewis6991/gitsigns.nvim" },
+  { "nvim-tree/nvim-tree.lua", dependencies = { "nvim-tree/nvim-web-devicons" } },
+  
+  -- Navigation
+  { "christoomey/vim-tmux-navigator" },
+  { "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
+  { "tpope/vim-fugitive" },
+
+  -- Syntax & Parsing
+  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+  { "windwp/nvim-autopairs" },
+
+  -- LSP & Auto-Completion (Mason Stack)
+  { "williamboman/mason.nvim" },
+  { "williamboman/mason-lspconfig.nvim" },
+  { "neovim/nvim-lspconfig" },
+  { "mrcjkb/rustaceanvim", version = "^4", ft = { "rust" } },
+  { 
+    "hrsh7th/nvim-cmp", 
+    dependencies = { 
+      "hrsh7th/cmp-nvim-lsp", 
+      "hrsh7th/cmp-buffer", 
+      "hrsh7th/cmp-path", 
+      "L3MON4D3/LuaSnip", 
+      "saadparwaiz1/cmp_luasnip" 
+    } 
+  },
+
+  -- Debugging & Linting
+  { "mfussenegger/nvim-dap" },
+  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
+  { "nvimtools/none-ls.nvim" },
+})
+
+-- ── Theme Setup ──────────────────────────────────────────
 vim.cmd[[colorscheme gruvbox]]
 
+-- ── Mason & LSP Configuration ────────────────────────────
+-- Mason must load before LSPConfig
+require("mason").setup()
+require("mason-lspconfig").setup({
+  ensure_installed = { "clangd", "pyright", "lua_ls" },
+})
+
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+local lspconfig = require('lspconfig')
+
+-- C++
+lspconfig.clangd.setup { capabilities = capabilities }
+-- Python
+lspconfig.pyright.setup { capabilities = capabilities }
+-- Lua
+lspconfig.lua_ls.setup {
+  capabilities = capabilities,
+  settings = { Lua = { diagnostics = { globals = { "vim" } } } }
+}
+
+-- ── Treesitter Configuration ─────────────────────────────
 require("nvim-treesitter.configs").setup {
-  ensure_installed = {
-    "c", "cpp", "lua", "rust", "toml", "python", "bash"
-  },
+  ensure_installed = { "c", "cpp", "lua", "rust", "python", "bash" },
   auto_install = true,
   highlight = { enable = true },
 }
 
-require("lualine").setup {
-  options = {
-    theme = "gruvbox",
-    section_separators = "",
-    component_separators = "",
-  },
-}
-
-require("nvim-autopairs").setup {}
-require("nvim-tree").setup {}
-require("telescope").setup {}
-require("gitsigns").setup()
-
+-- ── Autocompletion (CMP) ─────────────────────────────────
 local cmp = require("cmp")
 cmp.setup({
-  snippet = {
-    expand = function(args) require("luasnip").lsp_expand(args.body) end,
-  },
+  snippet = { expand = function(args) require("luasnip").lsp_expand(args.body) end },
   mapping = cmp.mapping.preset.insert({
     ["<CR>"] = cmp.mapping.confirm({ select = true }),
     ["<Tab>"] = cmp.mapping.select_next_item(),
@@ -93,40 +121,23 @@ cmp.setup({
   }),
   sources = {
     { name = "nvim_lsp" },
+    { name = "luasnip" },
     { name = "buffer" },
     { name = "path" },
-    { name = "luasnip" },
   },
 })
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
--- Fix: Define lspconfig here
-local lspconfig = require('lspconfig')
-local servers = { 'pyright', 'clangd', 'lua_ls' }
-
-for _, lsp in ipairs(servers) do
-  local opts = {
-    capabilities = capabilities,
-  }
-  if lsp == "lua_ls" then
-    opts.settings = {
-      Lua = {
-        diagnostics = { globals = { "vim" } },
-        workspace = { library = vim.api.nvim_get_runtime_file("", true) },
-      }
-    }
-  end
-  lspconfig[lsp].setup(opts)
-end
-
+-- ── Debugging (DAP) ──────────────────────────────────────
 local dap = require("dap")
 local dapui = require("dapui")
 dapui.setup()
 
+-- Auto open/close debugger UI
 dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
 dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
 dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
 
+-- C/C++ Adapter
 dap.adapters.gdb = {
   type = 'executable',
   command = 'gdb',
@@ -138,13 +149,17 @@ dap.configurations.c = {
     name = "Launch",
     type = "gdb",
     request = "launch",
-    program = "${workspaceFolder}/data_structures", 
+    -- Dynamically prompt for executable path
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
     cwd = "${workspaceFolder}",
   }
 }
+dap.configurations.cpp = dap.configurations.c
 
+-- ── Formatting & Linting ─────────────────────────────────
 local null_ls = require("null-ls")
-
 null_ls.setup({
   sources = {
     null_ls.builtins.formatting.clang_format,
@@ -152,17 +167,38 @@ null_ls.setup({
   },
 })
 
--- Keymaps
+-- ── Keymaps ──────────────────────────────────────────────
+-- Diagnostics
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostics' })
+vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
+
+-- Build Automation
+vim.keymap.set('n', '<leader>m', ':make<CR>', { desc = 'Run Make' })
+vim.keymap.set('n', '<leader>mr', ':make run<CR>', { desc = 'Make Run' })
+vim.keymap.set('n', '<leader>mc', ':make clean<CR>', { desc = 'Make Clean' })
+
+-- Debugging
+vim.keymap.set('n', '<leader>d', dap.continue, { desc = 'Debug: Start/Continue' })
+vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
+vim.keymap.set('n', '<leader>du', dapui.toggle, { desc = 'Debug: Toggle UI' })
+
+-- File Finding
+vim.keymap.set('n', '<leader>ff', require'telescope.builtin'.find_files, { desc = 'Find Files' })
+vim.keymap.set('n', '<leader>fg', require'telescope.builtin'.live_grep, { desc = 'Grep Files' })
+vim.keymap.set('n', '<leader>fb', require'telescope.builtin'.buffers, { desc = 'Find Buffers' })
+
+-- Tools
+vim.keymap.set('n', '<leader>v', ':!valgrind --leak-check=full ./main<CR>', { desc = 'Run Valgrind' })
+
+-- Window Navigation (Netrw / Splits)
 vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]])
 vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]])
 vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]])
 vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]])
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostics' })
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
-vim.keymap.set('n', '<leader>m', ':make<CR>', { desc = 'Run Make' })
-vim.keymap.set('n', '<leader>mc', ':make clean<CR>', { desc = 'Make Clean' })
-vim.keymap.set('n', '<leader>mr', ':make run<CR>', { desc = 'Make Run' })
-vim.keymap.set('n', '<leader>d', require'dap'.continue, { desc = 'Debug Continue' })
-vim.keymap.set('n', '<leader>du', require'dapui'.toggle, { desc = 'Toggle DAP UI' })
-vim.keymap.set('n', '<leader>mv', ':!valgrind --leak-check=full ./data_structures<CR>', { desc = 'Valgrind Leak Check' })
-vim.keymap.set('n', '<leader>ff', require'telescope.builtin'.find_files, { desc = 'Find Files' })
+
+-- Setup Lualine, Autopairs, etc.
+require("lualine").setup { options = { theme = "gruvbox", section_separators = "", component_separators = "" } }
+require("nvim-autopairs").setup {}
+require("nvim-tree").setup {}
+require("telescope").setup {}
+require("gitsigns").setup()
