@@ -27,7 +27,8 @@ if [[ "$OS" == "Darwin" ]]; then
 
     # Kitty Terminal Integration
     # 'kitten ssh' automatically propagates terminfo and clipboard capability
-    alias s="kitty +kitten ssh"
+    #alias s="kitty +kitten ssh"
+    alias s="kitty +kitten ssh tristan@pop-os"
     
     # Mosh Integration (Optional: requires 'brew install mosh')
     alias m="kitty +kitten ssh --kitten=mosh"
@@ -43,6 +44,26 @@ elif [[ "$OS" == "Linux" ]]; then
     # Sampling profiler configuration
     alias precord="sudo perf record -g"
     alias preport="sudo perf report"
+
+    # ── Screen Power Management (X Authority Fix) ────────────────
+    # Use these functions to safely turn off the screen power when SSHing.
+    function display-off() {
+        local AUTH_FILE=$(find /run/user/$(id -u) -name 'Xauthority' 2>/dev/null | head -n 1)
+        
+        if [ -n "$AUTH_FILE" ]; then
+            # Export the XAUTH key and the correct display number (:1 worked)
+            export XAUTHORITY=$AUTH_FILE
+            export DISPLAY=:1 
+            
+            echo "Turning display off..."
+            xset dpms force off
+        else
+            echo "ERROR: Xauthority key missing. Ensure the Razer is logged in locally."
+        fi
+    }
+
+    # Alias to restore the screen power
+    alias display-on="xset dpms force on"
 fi
 
 # ── Oh My Zsh Plugins ────────────────────────────────
