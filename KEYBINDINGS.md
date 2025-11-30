@@ -1,86 +1,87 @@
+# Keybindings & Commands Reference
 
-# Keybindings & Shortcuts Reference
+| Command / Alias | Description |
+| :--- | :--- |
+| **s** | **SSH into the Razer Laptop** (`tristan@pop-os`) |
+| **t** | **Tmux Session Management** (Attach to `main` session or create new) |
+| **display-off** | Power off the remote Razer display (via SSH/X authority) |
+| **display-on** | Power on the remote Razer display |
 
----
+-----
 
-## Kitty
+## Kitty Terminal Emulator
 
 | Shortcut | Action |
-|-----------|--------|
+| :--- | :--- |
 | **Cmd+Enter** | Open new Kitty **window** |
 | **Cmd+T** | Open new **tab** |
 | **Cmd+W** | Close window/tab |
-| **Ctrl+A** | Send prefix to tmux |
-| **Ctrl+B** | Send prefix to tmux (alt prefix) |
-| **Cmd+,** | Open Kitty preferences |
-| **Cmd+Shift+→ / ←** | Switch tabs (Kitty default) |
+| **Ctrl+A** | Send prefix to tmux (Primary Prefix) |
+| **Ctrl+B** | Send prefix to tmux (Alternate Prefix) |
+| **Cmd+Shift+→ / ←** | Switch tabs |
 | **Cmd+Q** | Quit Kitty |
-| **ktmux** *(shell alias)* | Open new Kitty window attached to same tmux session |
 
----
+-----
 
-## tmux
+## tmux Multiplexer
 
 > Prefix = `Ctrl+A`
 
 | Shortcut | Action |
-|-----------|--------|
-| **Prefix + " ** | Split pane horizontally |
+| :--- | :--- |
+| **Prefix + "** | Split pane horizontally |
 | **Prefix + %** | Split pane vertically |
 | **Prefix + C** | Create new tmux window |
 | **Prefix + N / P** | Next / previous tmux window |
-| **Prefix + ,** | Rename current window |
-| **Prefix + &** | Close current window |
 | **Prefix + Arrow keys** | Move between panes |
+| **Prefix + R** | **Reload tmux config** (`~/.tmux.conf`) |
+| **Prefix + D** | Detach from session (session stays running) |
 | **Prefix + Z** | Zoom / unzoom pane |
-| **Prefix + R** | Reload tmux config |
-| **Prefix + D** | Detach from session |
-| **tmux ls** | List active sessions |
-| **tmux attach -t main** | Reattach to main session |
-| **Prefix + ?** | Show keybindings inside tmux |
 | **Mouse drag / click** | Resize / focus panes (mouse enabled) |
 
----
+-----
 
-## Neovim
+## Neovim Editor
 
-### Navigation
+### Navigation & Core
 
 | Shortcut | Action |
-|-----------|--------|
-| **Ctrl+h / j / k / l** | Move between Neovim splits *and* tmux panes |
-| **:q** | Quit buffer |
-| **:w** | Save file |
-| **:wq** | Save + quit |
+| :--- | :--- |
+| **Ctrl+h / j / k / l** | **Seamlessly move** between Neovim splits *and* tmux panes |
+| **gd** | Go to definition (LSP) |
+| **\<leader\>e** | Show diagnostics (LSP) |
+| **\<leader\>ff** | Fuzzy find files (Telescope) |
 | **:NvimTreeToggle** | Toggle file explorer |
 | **:Git** | Open fugitive Git interface |
 
-### Visual & Utility
+### Build & Debugging
 
 | Shortcut | Action |
-|-----------|--------|
-| **Space** | Reserved for leader key (future mappings) |
+| :--- | :--- |
+| **\<leader\>m** | Run `:make` (Build project) |
+| **\<leader\>mr** | Run `:make run` |
+| **\<leader\>v** | **Run Valgrind** (Memory Check) |
+| **\<leader\>d** | **Debug** (Start/Continue DAP) |
+| **\<leader\>du** | Toggle DAP UI |
 | **:TSUpdate** | Update Treesitter parsers |
-| **:colorscheme catppuccin** | Switch to soft color theme |
-| **:colorscheme gruvbox** | Switch to classic dark theme |
 
----
+-----
 
-## Shell / Zsh
+## Shell & Utilities (Zsh)
 
-| Command / Shortcut | Action |
-|---------------------|--------|
-| **ll** | List files (long format) |
+| Command / Alias | Description |
+| :--- | :--- |
+| **v** | Open Neovim (`nvim`) |
+| **ll** | List files (long format: `ls -la`) |
 | **gs / ga / gc** | Git status / add / commit |
-| **tmux attach -t main** | Reattach to existing tmux session |
-| **ktmux** | Launch new Kitty window attached to tmux |
-| **exit** | Leave shell (or detach from tmux) |
+| **pstat** | Run **`perf stat`** for cache miss/cycle analysis |
+| **precord** | Run **`perf record`** for profiling |
+| **exit** | Leave current shell or detach from tmux session |
 
----
+-----
 
-## Extras
+## Notes
 
-- Close Kitty anytime — tmux + Neovim stay alive in the background.  
-  Reattach later with:
-  ```bash
-  tmux attach -t main
+  * **Persistence:** Closing the Kitty window **does not kill** your remote Neovim or tmux session.
+  * **Reattach:** Use the `t` alias or `s` alias to reconnect and run `t` to reattach instantly.
+  * **Clipboard:** Copying in Neovim automatically copies to your Mac's system clipboard (OSC 52 via Kitty).
