@@ -17,11 +17,17 @@ Clone the repository and run the installation/update script:
 ```bash
 (
   if [ -d ~/dotfiles ]; then
-    cd ~/dotfiles && git pull
+    cd ~/dotfiles
+    echo "Syncing repository state..."
+    git fetch
+    git reset --hard origin/main
   else
+    echo "Cloning repository..."
     git clone https://github.com/tristan-carter/dotfiles.git ~/dotfiles
     cd ~/dotfiles
   fi
+  
+  echo "Running installer..."
   chmod +x install.sh
   ./install.sh
 )
