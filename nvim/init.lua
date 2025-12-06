@@ -1,11 +1,11 @@
 -- ── Bootstrap Lazy.nvim ──────────────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git", "clone", "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", lazypath,
-  })
+    vim.fn.system({
+        "git", "clone", "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable", lazypath,
+    })
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -26,105 +26,119 @@ vim.opt.tabstop = 4
 vim.opt.smartindent = true
 
 -- ── Remote Clipboard (OSC 52) ────────────────────────────
--- Configures Neovim to use ANSI escape codes for clipboard.
--- Essential for copying from remote Linux to local Mac.
 vim.g.clipboard = {
-  name = 'OSC 52',
-  copy = {
-    ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-    ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
-  },
-  paste = {
-    ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-    ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
-  },
+    name = 'OSC 52',
+    copy = {
+        ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+        ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+    },
+    paste = {
+        ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+        ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+    },
 }
 vim.opt.clipboard = "unnamedplus"
 
 -- ── Plugin Specification ─────────────────────────────────
 require("lazy").setup({
-  -- UI & Theme
-  { "morhetz/gruvbox" },
-  { "nvim-lualine/lualine.nvim" },
-  { "lewis6991/gitsigns.nvim" },
-  { "nvim-tree/nvim-tree.lua", dependencies = { "nvim-tree/nvim-web-devicons" } },
-  
-  -- Navigation
-  { "christoomey/vim-tmux-navigator" },
-  { "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
-  { "tpope/vim-fugitive" },
+    -- UI & Theme
+    { "morhetz/gruvbox" },
+    { "nvim-lualine/lualine.nvim" },
+    { "lewis6991/gitsigns.nvim" },
+    { "nvim-tree/nvim-tree.lua", dependencies = { "nvim-tree/nvim-web-devicons" } },
 
-  -- Syntax & Parsing
-  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-  { "windwp/nvim-autopairs" },
+    -- Navigation
+    { "christoomey/vim-tmux-navigator" },
+    { "nvim-telescope/telescope.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
+    { "tpope/vim-fugitive" },
 
-  -- LSP & Auto-Completion (Mason Stack)
-  { "williamboman/mason.nvim" },
-  { "williamboman/mason-lspconfig.nvim" },
-  { "neovim/nvim-lspconfig" },
-  { "mrcjkb/rustaceanvim", version = "^4", ft = { "rust" } },
-  { 
-    "hrsh7th/nvim-cmp", 
-    dependencies = { 
-      "hrsh7th/cmp-nvim-lsp", 
-      "hrsh7th/cmp-buffer", 
-      "hrsh7th/cmp-path", 
-      "L3MON4D3/LuaSnip", 
-      "saadparwaiz1/cmp_luasnip" 
-    } 
-  },
+    -- Syntax & Parsing
+    { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+    { "windwp/nvim-autopairs" },
 
-  -- Debugging & Linting
-  { "mfussenegger/nvim-dap" },
-  { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
-  { "nvimtools/none-ls.nvim" },
+    -- LSP & Auto-Completion (Mason Stack)
+    { "williamboman/mason.nvim" },
+    { "williamboman/mason-lspconfig.nvim" },
+    { "neovim/nvim-lspconfig" },
+    { "mrcjkb/rustaceanvim", version = "^4", ft = { "rust" } },
+    {
+        "hrsh7th/nvim-cmp",
+        dependencies = {
+            "hrsh7th/cmp-nvim-lsp",
+            "hrsh7th/cmp-buffer",
+            "hrsh7th/cmp-path",
+            "L3MON4D3/LuaSnip",
+            "saadparwaiz1/cmp_luasnip"
+        }
+    },
+
+    -- Debugging & Linting
+    { "mfussenegger/nvim-dap" },
+    { "rcarriga/nvim-dap-ui", dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } },
+    { "nvimtools/none-ls.nvim" },
 })
 
 -- ── Theme Setup ──────────────────────────────────────────
 vim.cmd[[colorscheme gruvbox]]
 
 -- ── Mason & LSP Configuration ────────────────────────────
--- Mason must load before LSPConfig
 require("mason").setup()
+
+-- List of servers to install and configure
+local servers = { "clangd", "pyright", "lua_ls" }
+
 require("mason-lspconfig").setup({
-  ensure_installed = { "clangd", "pyright", "lua_ls" },
+    ensure_installed = servers,
+    automatic_installation = false, -- We handle setup manually below
 })
 
+-- Prepare Capabilities (for nvim-cmp)
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local lspconfig = require('lspconfig')
 
--- C++
-lspconfig.clangd.setup { capabilities = capabilities }
--- Python
-lspconfig.pyright.setup { capabilities = capabilities }
--- Lua
-lspconfig.lua_ls.setup {
-  capabilities = capabilities,
-  settings = { Lua = { diagnostics = { globals = { "vim" } } } }
+-- Server-Specific Settings
+local server_settings = {
+    ["lua_ls"] = {
+        settings = {
+            Lua = { diagnostics = { globals = { "vim" } } }
+        }
+    }
 }
+
+-- Setup Loop (Handles 0.11 Deprecation)
+for _, server in ipairs(servers) do
+    local config = server_settings[server] or {}
+    config.capabilities = capabilities
+
+    if vim.fn.has("nvim-0.11") == 1 then
+        vim.lsp.config(server, config)
+        vim.lsp.enable(server)
+    else
+        require("lspconfig")[server].setup(config)
+    end
+end
 
 -- ── Treesitter Configuration ─────────────────────────────
 require("nvim-treesitter.configs").setup {
-  ensure_installed = { "c", "cpp", "lua", "rust", "python", "bash" },
-  auto_install = true,
-  highlight = { enable = true },
+    ensure_installed = { "c", "cpp", "lua", "rust", "python", "bash" },
+    auto_install = true,
+    highlight = { enable = true },
 }
 
 -- ── Autocompletion (CMP) ─────────────────────────────────
 local cmp = require("cmp")
 cmp.setup({
-  snippet = { expand = function(args) require("luasnip").lsp_expand(args.body) end },
-  mapping = cmp.mapping.preset.insert({
-    ["<CR>"] = cmp.mapping.confirm({ select = true }),
-    ["<Tab>"] = cmp.mapping.select_next_item(),
-    ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-  }),
-  sources = {
-    { name = "nvim_lsp" },
-    { name = "luasnip" },
-    { name = "buffer" },
-    { name = "path" },
-  },
+    snippet = { expand = function(args) require("luasnip").lsp_expand(args.body) end },
+    mapping = cmp.mapping.preset.insert({
+        ["<CR>"] = cmp.mapping.confirm({ select = true }),
+        ["<Tab>"] = cmp.mapping.select_next_item(),
+        ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+    }),
+    sources = {
+        { name = "nvim_lsp" },
+        { name = "luasnip" },
+        { name = "buffer" },
+        { name = "path" },
+    },
 })
 
 -- ── Debugging (DAP) ──────────────────────────────────────
@@ -139,32 +153,32 @@ dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
 
 -- C/C++ Adapter
 dap.adapters.gdb = {
-  type = 'executable',
-  command = 'gdb',
-  args = { '-i', 'dap' }
+    type = 'executable',
+    command = 'gdb',
+    args = { '-i', 'dap' }
 }
 
 dap.configurations.c = {
-  {
-    name = "Launch",
-    type = "gdb",
-    request = "launch",
-    -- Dynamically prompt for executable path
-    program = function()
-      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-    end,
-    cwd = "${workspaceFolder}",
-  }
+    {
+        name = "Launch",
+        type = "gdb",
+        request = "launch",
+        -- Dynamically prompt for executable path
+        program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = "${workspaceFolder}",
+    }
 }
 dap.configurations.cpp = dap.configurations.c
 
 -- ── Formatting & Linting ─────────────────────────────────
 local null_ls = require("null-ls")
 null_ls.setup({
-  sources = {
-    null_ls.builtins.formatting.clang_format,
-    null_ls.builtins.diagnostics.cppcheck,
-  },
+    sources = {
+        null_ls.builtins.formatting.clang_format,
+        null_ls.builtins.diagnostics.cppcheck,
+    },
 })
 
 -- ── Keymaps ──────────────────────────────────────────────
