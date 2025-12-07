@@ -44,8 +44,8 @@ elif [[ "$OS" == "Linux" ]]; then
     fi
     # Install Neovim (Stable PPA for consistency with Mac)
     # Default apt version is often too old (v0.6) for modern plugins
-    echo "[Linux] Adding Neovim Stable PPA..."
-    sudo add-apt-repository -y ppa:neovim-ppa/stable
+    echo "[Linux] Adding Neovim Unstable PPA..."
+    sudo add-apt-repository -y ppa:neovim-ppa/unstable
     sudo apt update
     echo "[Linux] Installing/Upgrading Neovim..."
     sudo apt install -y neovim
