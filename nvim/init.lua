@@ -78,8 +78,25 @@ require("lazy").setup({
     { "nvimtools/none-ls.nvim" },
 })
 
+require("tokyonight").setup({
+    style = "night",  -- Options: storm, moon, night, day (night is darkest/most muted)
+    transparent = false,  -- Set to true if you want background transparency
+    terminal_colors = true,
+    styles = {
+        comments = { italic = true },
+        keywords = { italic = false },
+        functions = {},
+        variables = {},
+        sidebars = "dark",
+        floats = "dark",
+    },
+    on_highlights = function(hl, c)
+        -- Optional: Tone down bright elements if needed
+        hl.Normal = { fg = c.fg, bg = c.bg }  -- Ensures consistent base
+    end,
+})
 -- ── Theme Setup ──────────────────────────────────────────
-vim.cmd[[colorscheme gruvbox]]
+vim.cmd[[colorscheme tokyonight]]
 
 -- ── Mason & LSP Configuration ────────────────────────────
 require("mason").setup()
@@ -203,12 +220,6 @@ vim.keymap.set('n', '<leader>fb', require'telescope.builtin'.buffers, { desc = '
 
 -- Tools
 vim.keymap.set('n', '<leader>v', ':!valgrind --leak-check=full ./main<CR>', { desc = 'Run Valgrind' })
-
--- Window Navigation (Netrw / Splits)
-vim.keymap.set('t', '<C-h>', [[<C-\><C-n><C-w>h]])
-vim.keymap.set('t', '<C-j>', [[<C-\><C-n><C-w>j]])
-vim.keymap.set('t', '<C-k>', [[<C-\><C-n><C-w>k]])
-vim.keymap.set('t', '<C-l>', [[<C-\><C-n><C-w>l]])
 
 -- Setup Lualine, Autopairs, etc.
 require("lualine").setup { options = { theme = "gruvbox", section_separators = "", component_separators = "" } }
