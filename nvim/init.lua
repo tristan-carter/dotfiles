@@ -42,7 +42,7 @@ vim.opt.clipboard = "unnamedplus"
 -- ── Plugin Specification ─────────────────────────────────
 require("lazy").setup({
     -- UI & Theme
-    { "morhetz/gruvbox" },
+    { "folke/tokyonight.nvim" },
     { "nvim-lualine/lualine.nvim" },
     { "lewis6991/gitsigns.nvim" },
     { "nvim-tree/nvim-tree.lua", dependencies = { "nvim-tree/nvim-web-devicons" } },
