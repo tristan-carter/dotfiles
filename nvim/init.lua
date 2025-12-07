@@ -79,22 +79,24 @@ require("lazy").setup({
 })
 
 require("tokyonight").setup({
-    style = "night",  -- Options: storm, moon, night, day (night is darkest/most muted)
-    transparent = false,  -- Set to true if you want background transparency
-    terminal_colors = true,
+    style = "night",
+    transparent = true,
+    terminal_colors = false,
     styles = {
-        comments = { italic = true },
-        keywords = { italic = false },
-        functions = {},
-        variables = {},
+        comments = { italic = true, bold = false },
+        keywords = { italic = false, bold = false },
+        functions = { bold = false },
+        variables = { bold = false },
         sidebars = "dark",
         floats = "dark",
     },
     on_highlights = function(hl, c)
-        -- Optional: Tone down bright elements if needed
-        hl.Normal = { fg = c.fg, bg = c.bg }  -- Ensures consistent base
+        hl.Normal = { fg = c.fg_dark, bg = c.bg_dark }
+        hl.Comment = { fg = c.dark3 }
+        hl.String = { fg = c.green1 }
     end,
 })
+vim.cmd[[colorscheme tokyonight]]
 -- ── Theme Setup ──────────────────────────────────────────
 vim.cmd[[colorscheme tokyonight]]
 
