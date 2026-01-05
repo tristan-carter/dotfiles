@@ -103,3 +103,5 @@ alias t="tmux attach -t main || tmux new -s main"
 
 # ── Prompt Configuration ─────────────────────────────
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+export TERM=xterm-256color
