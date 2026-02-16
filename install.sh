@@ -51,7 +51,7 @@ elif [[ "$OS" == "Linux" ]]; then
     sudo apt install -y neovim
     # Install Linux Performance Tools (perf)
     echo "[Linux] Installing Performance Counters (perf)..."
-    sudo apt install -y linux-tools-common linux-tools-generic linux-tools-$(uname -r)
+    sudo apt install -y linux-tools-common linux-tools-generic linux-tools-$(uname -r) || echo "![WARNING] Could not install linux-tools via apt. If using a mainline kernel, this is expected."
     # Install Kitty Terminal
     if ! command -v kitty &>/dev/null; then
         echo "[Linux] Installing Kitty Terminal..."
