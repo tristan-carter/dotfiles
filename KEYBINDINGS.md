@@ -2,7 +2,7 @@
 
 | Command / Alias | Description |
 | :--- | :--- |
-| **s** | **SSH into the Razer Laptop** (`tristan@pop-os`) |
+| **s** | **SSH into the fd server** (`ubuntu@fdserver`) |
 | **t** | **Tmux Session Management** (Attach to `main` session or create new) |
 | **display-off** | Power off the remote Razer display (via SSH/X authority) |
 | **display-on** | Power on the remote Razer display |
