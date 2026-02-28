@@ -103,7 +103,7 @@ alias t="tmux new-session -A -s main"
 # ── Firedancer Development ───────────────────────────
 alias makefd="make -j fddev fdctl solana firedancer-dev"
 alias pullfd="git pull && git submodule update && ./deps.sh && make -j fddev fdctl solana firedancer-dev"
-alias pktgenfd="sudo fddev pktgen --config ~/config.toml"
+alias pktfd="sudo fddev pktgen --config ~/config.toml"
 alias devfd="sudo fddev dev --config ~/config.toml"
 alias confd="nvim ~/config.toml"
 
