@@ -158,4 +158,3 @@ else
 fi
 
 echo "==== Setup Complete ===="
-echo "Please restart your terminal or log out and back in for all changes to take effect."
