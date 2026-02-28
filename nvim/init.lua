@@ -104,34 +104,31 @@ require("mason").setup()
 
 local servers = { "clangd", "pyright", "lua_ls" }
 
+-- v2.0+ automatically enables servers, so we just ensure they are installed
 require("mason-lspconfig").setup({
     ensure_installed = servers,
     automatic_installation = false,
 })
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local server_settings = {
-    ["lua_ls"] = {
-        settings = { Lua = { diagnostics = { globals = { "vim" } } } }
-    }
-}
 
-require("mason-lspconfig").setup_handlers({
-    function(server_name)
-        local config = { capabilities = capabilities }
-        
-        if server_name == "lua_ls" then
-            config.settings = server_settings["lua_ls"].settings
-        end
+-- Replaced setup_handlers with a direct Lua loop
+for _, server_name in ipairs(servers) do
+    local config = { capabilities = capabilities }
+    
+    -- Server-specific configurations
+    if server_name == "lua_ls" then
+        config.settings = { Lua = { diagnostics = { globals = { "vim" } } } }
+    end
 
-        if vim.fn.has("nvim-0.11") == 1 then
-            vim.lsp.config(server_name, config)
-            vim.lsp.enable(server_name)
-        else
-            require("lspconfig")[server_name].setup(config)
-        end
-    end,
-})
+    -- Setup based on your Neovim version
+    if vim.fn.has("nvim-0.11") == 1 then
+        vim.lsp.config(server_name, config)
+        vim.lsp.enable(server_name)
+    else
+        require("lspconfig")[server_name].setup(config)
+    end
+end
 
 -- ── Treesitter Configuration ─────────────────────────────
 require("nvim-treesitter.configs").setup {
