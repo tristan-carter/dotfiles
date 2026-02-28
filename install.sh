@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# We removed the '-e' flag so the script will NOT crash on errors.
+# It will attempt to power through and do as much as it can.
+set -uo pipefail
 
 # -----------------------------------------------------------------------------
 # Configuration & Variables
@@ -28,7 +30,6 @@ if [[ "$OS" == "Darwin" ]]; then
     fi
 
     echo "[MacOS] Installing Core Utilities & Dev Tools..."
-    # Added tmux and gdb
     brew install git zsh wget node ripgrep fd neovim cmake llvm cppcheck rustup-init tmux gdb
     brew install --cask kitty font-fira-code-nerd-font
 
@@ -40,7 +41,6 @@ elif [[ "$OS" == "Linux" ]]; then
     sudo apt-get update -y
 
     echo "[Linux] Installing System & Dev Dependencies..."
-    # Added tmux and gdb
     sudo apt-get install -y build-essential git zsh curl wget unzip tar \
                         xclip nodejs npm ripgrep fd-find python3-venv \
                         cmake clang lldb lld cppcheck pkg-config libssl-dev \
@@ -84,7 +84,7 @@ elif [[ "$OS" == "Linux" ]]; then
         mkdir -p "$FONT_DIR/FiraCode"
         wget -q --show-progress -P "$FONT_DIR/FiraCode" https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
         unzip -q "$FONT_DIR/FiraCode/FiraCode.zip" -d "$FONT_DIR/FiraCode"
-        rm "$FONT_DIR/FiraCode/FiraCode.zip"
+        rm -f "$FONT_DIR/FiraCode/FiraCode.zip"
         fc-cache -fv
     fi
 fi
@@ -108,15 +108,16 @@ create_symlink() {
     local dest=$2
     mkdir -p "$(dirname "$dest")"
     
-    # Backup existing files or directories that aren't the correct symlink
+    # Check if destination exists
     if [ -e "$dest" ] || [ -L "$dest" ]; then
-        if [ "$(readlink "$dest")" != "$src" ]; then
-            echo "[Backup] Moving existing $dest to ${dest}.backup.$(date +%s)"
-            mv "$dest" "${dest}.backup.$(date +%s)"
-        else
-            # It's already the correct symlink, do nothing
+        # If it is a symlink AND already points to our source, we are good to go
+        if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
             return
         fi
+        
+        # Otherwise, back it up
+        echo "[Backup] Moving existing $dest to ${dest}.backup.$(date +%s)"
+        mv "$dest" "${dest}.backup.$(date +%s)"
     fi
     
     ln -sf "$src" "$dest"
@@ -142,8 +143,12 @@ echo "==== Changing Default Shell to Zsh ===="
 CURRENT_SHELL=$(basename "$SHELL")
 if [ "$CURRENT_SHELL" != "zsh" ]; then
     if command -v zsh &>/dev/null; then
-        # Use sudo to bypass the password prompt if we already cached sudo credentials
-        sudo chsh -s "$(which zsh)" "$USER"
+        # On Linux use sudo, on Mac run it normally
+        if [[ "$OS" == "Linux" ]]; then
+            sudo chsh -s "$(which zsh)" "$USER"
+        else
+            chsh -s "$(which zsh)"
+        fi
         echo "[Shell] Default shell changed to Zsh."
     else
         echo "[WARNING] Zsh is not installed. Skipping shell change."
