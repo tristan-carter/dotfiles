@@ -10,6 +10,12 @@ FONT_DIR="$HOME/.local/share/fonts"
 
 echo "==== Initializing Environment Setup ===="
 
+# Ask for the administrator password upfront and keep it alive
+if [[ "$OS" == "Linux" ]]; then
+    sudo -v
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+fi
+
 # -----------------------------------------------------------------------------
 # MacOS Setup
 # -----------------------------------------------------------------------------
@@ -22,7 +28,8 @@ if [[ "$OS" == "Darwin" ]]; then
     fi
 
     echo "[MacOS] Installing Core Utilities & Dev Tools..."
-    brew install git zsh wget node ripgrep fd neovim cmake llvm cppcheck rustup-init
+    # Added tmux and gdb
+    brew install git zsh wget node ripgrep fd neovim cmake llvm cppcheck rustup-init tmux gdb
     brew install --cask kitty font-fira-code-nerd-font
 
 # -----------------------------------------------------------------------------
@@ -30,13 +37,14 @@ if [[ "$OS" == "Darwin" ]]; then
 # -----------------------------------------------------------------------------
 elif [[ "$OS" == "Linux" ]]; then
     echo "[Linux] Detected. Updating package lists..."
-    sudo apt update
+    sudo apt-get update -y
 
     echo "[Linux] Installing System & Dev Dependencies..."
-    # Added cppcheck (fix neovim error) and clang/llvm for C++
-    sudo apt install -y build-essential git zsh curl wget unzip tar \
+    # Added tmux and gdb
+    sudo apt-get install -y build-essential git zsh curl wget unzip tar \
                         xclip nodejs npm ripgrep fd-find python3-venv \
-                        cmake clang lldb lld cppcheck pkg-config libssl-dev
+                        cmake clang lldb lld cppcheck pkg-config libssl-dev \
+                        tmux gdb
 
     # Install Rust if not present
     if ! command -v cargo &>/dev/null; then
@@ -53,14 +61,14 @@ elif [[ "$OS" == "Linux" ]]; then
     # Install Neovim Unstable PPA
     echo "[Linux] Adding Neovim Unstable PPA..."
     sudo add-apt-repository -y ppa:neovim-ppa/unstable
-    sudo apt update
+    sudo apt-get update -y
     echo "[Linux] Installing/Upgrading Neovim..."
-    sudo apt install -y neovim
+    sudo apt-get install -y neovim
 
     # Install Performance Tools (Graceful failure for mainline kernels)
     echo "[Linux] Installing Performance Counters (perf)..."
-    sudo apt install -y linux-tools-common linux-tools-generic linux-tools-$(uname -r) || \
-    echo "![WARNING] Could not install linux-tools via apt. Using manually compiled version."
+    sudo apt-get install -y linux-tools-common linux-tools-generic linux-tools-$(uname -r) || \
+    echo "[WARNING] Could not install linux-tools via apt. Using manually compiled version."
 
     # Install Kitty Terminal
     if ! command -v kitty &>/dev/null; then
@@ -99,8 +107,18 @@ create_symlink() {
     local src=$1
     local dest=$2
     mkdir -p "$(dirname "$dest")"
-    [ -L "$dest" ] && rm "$dest"
-    [ -e "$dest" ] && mv "$dest" "${dest}.backup"
+    
+    # Backup existing files or directories that aren't the correct symlink
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
+        if [ "$(readlink "$dest")" != "$src" ]; then
+            echo "[Backup] Moving existing $dest to ${dest}.backup.$(date +%s)"
+            mv "$dest" "${dest}.backup.$(date +%s)"
+        else
+            # It's already the correct symlink, do nothing
+            return
+        fi
+    fi
+    
     ln -sf "$src" "$dest"
     echo "[Link] $dest -> $src"
 }
@@ -112,9 +130,27 @@ create_symlink "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 create_symlink "$DOTFILES_DIR/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 
 if [ -d "$HOME/.config/nvim" ] && [ ! -L "$HOME/.config/nvim" ]; then
+    echo "[Backup] Moving existing Neovim config..."
     mv "$HOME/.config/nvim" "$HOME/.config/nvim.backup.$(date +%s)"
 fi
 create_symlink "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
+# -----------------------------------------------------------------------------
+# Finalization
+# -----------------------------------------------------------------------------
+echo "==== Changing Default Shell to Zsh ===="
+CURRENT_SHELL=$(basename "$SHELL")
+if [ "$CURRENT_SHELL" != "zsh" ]; then
+    if command -v zsh &>/dev/null; then
+        # Use sudo to bypass the password prompt if we already cached sudo credentials
+        sudo chsh -s "$(which zsh)" "$USER"
+        echo "[Shell] Default shell changed to Zsh."
+    else
+        echo "[WARNING] Zsh is not installed. Skipping shell change."
+    fi
+else
+    echo "[Shell] Zsh is already the default shell."
+fi
+
 echo "==== Setup Complete ===="
-echo "Please restart your terminal or run 'source ~/.zshrc' and 'source ~/.cargo/env'."
+echo "Please restart your terminal or log out and back in for all changes to take effect."
