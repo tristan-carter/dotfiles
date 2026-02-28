@@ -98,7 +98,7 @@ alias gd='git diff'
 
 # ── Aliases: Session Management ──────────────────────
 # Attach to existing 'main' session or create new
-alias t="tmux attach -t main || tmux new -s main"
+alias t="tmux new-session -A -s main"
 
 # ── Firedancer Development ───────────────────────────
 alias makefd="make -j fddev fdctl solana firedancer-dev"
