@@ -107,5 +107,27 @@ alias pktgenfd="sudo fddev pktgen --config ~/config.toml"
 alias devfd="sudo fddev dev --config ~/config.toml"
 alias confd="nvim ~/config.toml"
 
+# ── Hardware & Performance Tuning ────────────────────
+alias disable-ht="echo off | sudo tee /sys/devices/system/cpu/smt/control"
+
+function clockspeed() {
+    if [ -z "$1" ]; then
+        echo "Usage: clockspeed <GHz> (e.g., clockspeed 3.2)"
+        return 1
+    fi
+    sudo cpupower frequency-set -u "${1}GHz" -d "${1}GHz"
+}
+
+# ── Firedancer Branch Management ─────────────────────
+function branchfd() {
+    if [ -z "$1" ]; then
+        echo "Usage: branchfd <branch-name>"
+        return 1
+    fi
+    git pull
+    git checkout -b "$1" "tristan/tristan-carter/$1"
+    make -j fddev fdctl solana firedancer-dev
+}
+
 # ── Prompt Configuration ─────────────────────────────
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
