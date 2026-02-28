@@ -11,7 +11,7 @@
 | **`makefd`** | Fast build: `make -j fddev fdctl solana firedancer-dev` |
 | **`branchfd <name>`**| Pull, checkout `tristan/tristan-carter/<name>`, and build |
 | **`devfd`** | Run `sudo fddev dev` with `config.toml` |
-| **`pktgenfd`** | Run `sudo fddev pktgen` with `config.toml` |
+| **`pktfd`** | Run `sudo fddev pktgen` with `config.toml` |
 | **`confd`** | Open `config.toml` in Neovim |
 | **`exit`** | Leave current shell or detach from tmux session |
 
