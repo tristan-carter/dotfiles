@@ -27,7 +27,6 @@ if [[ "$OS" == "Darwin" ]]; then
 
     # Kitty Terminal Integration
     # 'kitten ssh' automatically propagates terminfo and clipboard capability
-    #alias s="kitty +kitten ssh"
     alias s="kitty +kitten ssh ubuntu@fdserver"
     
     # Mosh Integration (Optional: requires 'brew install mosh')
@@ -101,7 +100,12 @@ alias gd='git diff'
 # Attach to existing 'main' session or create new
 alias t="tmux attach -t main || tmux new -s main"
 
+# ── Firedancer Development ───────────────────────────
+alias makefd="make -j fddev fdctl solana firedancer-dev"
+alias pullfd="git pull && git submodule update && ./deps.sh && make -j fddev fdctl solana firedancer-dev"
+alias pktgenfd="sudo fddev pktgen --config ~/config.toml"
+alias devfd="sudo fddev dev --config ~/config.toml"
+alias confd="nvim ~/config.toml"
+
 # ── Prompt Configuration ─────────────────────────────
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-export TERM=xterm-256color
