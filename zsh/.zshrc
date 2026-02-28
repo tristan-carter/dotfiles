@@ -28,7 +28,7 @@ if [[ "$OS" == "Darwin" ]]; then
     # Kitty Terminal Integration
     # 'kitten ssh' automatically propagates terminfo and clipboard capability
     #alias s="kitty +kitten ssh"
-    alias s="kitty +kitten ssh tristan@pop-os"
+    alias s="kitty +kitten ssh ubuntu@fdserver"
     
     # Mosh Integration (Optional: requires 'brew install mosh')
     alias m="kitty +kitten ssh --kitten=mosh"
