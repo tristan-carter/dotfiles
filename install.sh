@@ -30,7 +30,7 @@ if [[ "$OS" == "Darwin" ]]; then
     fi
 
     echo "[MacOS] Installing Core Utilities & Dev Tools..."
-    brew install git zsh wget node ripgrep fd neovim cmake llvm cppcheck rustup-init tmux gdb
+    brew install git zsh wget node ripgrep fd neovim cmake llvm cppcheck rustup-init tmux gdb zoxide
     brew install --cask kitty font-fira-code-nerd-font
 
 # -----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ elif [[ "$OS" == "Linux" ]]; then
     sudo apt-get install -y build-essential git zsh curl wget unzip tar \
                         xclip nodejs npm ripgrep fd-find python3-venv \
                         cmake clang lldb lld cppcheck pkg-config libssl-dev \
-                        tmux gdb
+                        tmux gdb zoxide
 
     # Install Rust if not present
     if ! command -v cargo &>/dev/null; then
