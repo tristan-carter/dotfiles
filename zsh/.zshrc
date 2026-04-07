@@ -9,6 +9,9 @@ export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="nvim"
 export VISUAL="nvim"
 
+# Kitty Terminal SSH Fix (Translates custom terminfo for standard servers)
+[ "$TERM" = "xterm-kitty" ] && export TERM=xterm-256color
+
 OS="$(uname -s)"
 
 # ── macOS Configuration ──────────────────────────────
@@ -32,7 +35,7 @@ if [[ "$OS" == "Darwin" ]]; then
     # Mosh Integration (Optional: requires 'brew install mosh')
     alias m="kitty +kitten ssh --kitten=mosh"
 
-# ── Linux Configuration (Razer) ──────────────────────
+# ── Linux Configuration (Dell/Razer) ─────────────────
 elif [[ "$OS" == "Linux" ]]; then
     export PATH="$HOME/.local/bin:$PATH"
 
@@ -57,7 +60,7 @@ elif [[ "$OS" == "Linux" ]]; then
             echo "Turning display off..."
             xset dpms force off
         else
-            echo "ERROR: Xauthority key missing. Ensure the Razer is logged in locally."
+            echo "ERROR: Xauthority key missing. Ensure the system is logged in locally."
         fi
     }
 
@@ -70,9 +73,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins:
 # - git: standard git aliases
-# - z: jump to frequent directories
 # - sudo: double-tap ESC to prepend sudo
-plugins=(git z sudo) 
+# Note: 'z' has been removed in favor of zoxide at the EOF.
+plugins=(git sudo) 
 
 if [ -f "$ZSH/oh-my-zsh.sh" ]; then
   source "$ZSH/oh-my-zsh.sh"
@@ -82,11 +85,6 @@ fi
 alias v='nvim'
 alias vim='nvim'
 alias ll='ls -la'
-
-# Use GNU ls colors if available (Linux)
-if [[ "$OS" == "Linux" ]]; then
-    alias ls='ls --color=auto'
-fi
 
 # ── Aliases: Git ─────────────────────────────────────
 alias gs='git status'
@@ -125,9 +123,14 @@ function branchfd() {
         return 1
     fi
     git pull
-    git checkout -b "$1" "tristan/tristan-carter/$1"
+    git checkout -b "$1" "tristan/tristan-carter/$1" || { echo "Error: Branch checkout failed. Make sure the remote branch exists."; return 1; }
     make -j fddev fdctl solana firedancer-dev
 }
 
 # ── Prompt Configuration ─────────────────────────────
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# ── Zoxide Initialization ────────────────────────────
+# Replaces 'z' plugin for faster, algorithm-based directory jumping.
+# Must be initialized at the end of the file.
+eval "$(zoxide init zsh)"
